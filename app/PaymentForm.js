@@ -1,24 +1,27 @@
-'use client';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function PaymentForm() {
-  const [cardNumber, setCardNumber] = useState('');
+  const [cardNumber, setCardNumber] = useState("");
+  const [expMonth, setExpMonth] = useState("");
+  const [expYear, setExpYear] = useState("");
+  const [cvv, setCvv] = useState("");
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    address: '',
-    city: '',
-    state: '',
-    zip: '',
+    name: "",
+    email: "",
+    address: "",
+    city: "",
+    state: "",
+    zip: "",
   });
 
   const router = useRouter();
 
-  const formatCardNumber = (value) => { 
-    value = value.replace(/\s/g, '');
+  const formatCardNumber = (value) => {
+    value = value.replace(/\s/g, "");
     if (!isNaN(value)) {
-      value = value.match(/.{1,4}/g)?.join(' ') || '';
+      value = value.match(/.{1,4}/g)?.join(" ") || "";
     }
     return value;
   };
@@ -30,14 +33,44 @@ export default function PaymentForm() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent default form submission
     const randomOrderNumber = Math.floor(Math.random() * 1000000); // Generate random order number
 
-    // Logging to check if handleSubmit is triggered
-    console.log("Form submitted with data:", formData, cardNumber, randomOrderNumber);
+    // Ensure expMonth, expYear, and cvv are captured in the form submission data
+    const formDataWithCard = {
+      ...formData,
+      cardNumber,
+      expMonth,
+      expYear,
+      cvv,
+      orderNumber: randomOrderNumber,
+    };
 
-    router.push(`/order-summary?name=${encodeURIComponent(formData.name)}&email=${encodeURIComponent(formData.email)}&address=${encodeURIComponent(formData.address)}&cardNumber=${encodeURIComponent(cardNumber)}&orderNumber=${randomOrderNumber}`);
+    // Logging to check formDataWithCard
+    console.log("Form submitted with data:", formDataWithCard);
+
+    try {
+      const response = await fetch("/api/submit-payment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formDataWithCard),
+      });
+
+      if (response.ok) {
+        router.push(
+          `/order-summary?name=${encodeURIComponent(
+            formData.name
+          )}&orderNumber=${randomOrderNumber}`
+        );
+      } else {
+        console.error("Order failed");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
   };
 
   return (
@@ -47,6 +80,7 @@ export default function PaymentForm() {
           <div className="flex-1 min-w-[250px]">
             <h3 className="text-xl text-[#ED3717] mb-2">Billing Address</h3>
 
+            {/* Address fields */}
             <div className="mb-4">
               <label htmlFor="name">Full Name:</label>
               <input
@@ -137,11 +171,19 @@ export default function PaymentForm() {
           <div className="flex-1 min-w-[250px]">
             <h3 className="text-xl text-[#ED3717] mb-2">Payment</h3>
 
+            {/* Name on Card */}
             <div className="mb-4">
-<label htmlFor="cardName">Name On Card:</label>
-<input type="text" id="cardName" placeholder="Enter card name" required className="w-full border p-2 text-black" />
-</div>
+              <label htmlFor="cardName">Name On Card:</label>
+              <input
+                type="text"
+                id="cardName"
+                placeholder="Enter card name"
+                required
+                className="w-full border p-2 text-black"
+              />
+            </div>
 
+            {/* Credit Card Number */}
             <div className="mb-4">
               <label htmlFor="cardNum">Credit Card Number:</label>
               <input
@@ -149,7 +191,9 @@ export default function PaymentForm() {
                 id="cardNum"
                 name="cardNum"
                 value={cardNumber}
-                onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
+                onChange={(e) =>
+                  setCardNumber(formatCardNumber(e.target.value))
+                }
                 maxLength="19"
                 placeholder="1111-2222-3333-4444"
                 required
@@ -157,35 +201,69 @@ export default function PaymentForm() {
               />
             </div>
 
-            {/* Other payment fields... */}
-            
+            {/* Expiration Month */}
             <div className="mb-4">
               <label>Exp Month:</label>
-              <select className="w-full border p-2">
+              <select
+                value={expMonth}
+                onChange={(e) => setExpMonth(e.target.value)}
+                className="w-full border p-2"
+                required
+              >
                 <option value="">Choose month</option>
-                {['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((month) => (
-                  <option key={month} value={month}>{month}</option>
+                {[
+                  "January",
+                  "February",
+                  "March",
+                  "April",
+                  "May",
+                  "June",
+                  "July",
+                  "August",
+                  "September",
+                  "October",
+                  "November",
+                  "December",
+                ].map((month) => (
+                  <option key={month} value={month}>
+                    {month}
+                  </option>
                 ))}
               </select>
             </div>
 
+            {/* Expiration Year and CVV */}
             <div className="flex gap-4">
               <div className="flex-1">
                 <label>Exp Year:</label>
-                <select className="w-full border p-2">
+                <select
+                  value={expYear}
+                  onChange={(e) => setExpYear(e.target.value)}
+                  className="w-full border p-2"
+                  required
+                >
                   <option value="">Choose Year</option>
                   {[2023, 2024, 2025, 2026, 2027].map((year) => (
-                    <option key={year} value={year}>{year}</option>
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
                   ))}
                 </select>
               </div>
 
               <div className="flex-1">
                 <label htmlFor="cvv">CVV</label>
-                <input type="number" id="cvv" placeholder="1234" required className="w-full border p-2" />
+                <input
+                  type="number"
+                  id="cvv"
+                  value={cvv}
+                  onChange={(e) => setCvv(e.target.value)}
+                  placeholder="123"
+                  required
+                  className="w-full border p-2"
+                />
               </div>
             </div>
-
 
             <input
               type="submit"
@@ -198,19 +276,3 @@ export default function PaymentForm() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

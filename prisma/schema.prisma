@@ -10,27 +10,29 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 model Order {
-  id         Int      @id @default(autoincrement())
-  name       String
-  email      String
-  address    String
-  city       String
-  state      String
-  zip        String
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String
+  address     String
+  city        String
+  state       String
+  zip         String
   orderNumber Int
-  payment    Payment?
+  payment     Payment[] @relation("OrderToPayment")
 }
 
 model Payment {
-  id            Int    @id @default(autoincrement())
-  cardNumber    String
-  expMonth      String
-  expYear       String
-  cvv           String
-  orderId       Int    @unique
-  order         Order  @relation(fields: [orderId], references: [id])
+  id          Int      @id @default(autoincrement())
+  cardNumber  String
+  expMonth    String
+  expYear     String
+  cvv         String
+  orderId     Int
+  order       Order    @relation("OrderToPayment", fields: [orderId], references: [id])
 }
+

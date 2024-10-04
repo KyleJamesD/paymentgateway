@@ -6,6 +6,7 @@ export async function POST(request) {
   try {
     // Parse the JSON body from the request
     const { name, email, address, city, state, zip, cardNumber, expMonth, expYear, cvv, orderNumber } = await request.json();
+    console.log("Received data in API:", { name, email, address, city, state, zip, cardNumber, expMonth, expYear, cvv, orderNumber });
 
     // Simulate saving the order and payment details to the database
     const order = await prisma.order.create({
@@ -19,14 +20,16 @@ export async function POST(request) {
         orderNumber,
         payment: {
           create: {
-            cardNumber, // Note: In production, use encryption for sensitive data
+            cardNumber,
             expMonth,
             expYear,
-            cvv
-          }
-        }
-      }
-    });
+            cvv,
+          },
+        },
+      },
+    });    
+
+    console.log("Order created in the database:", order);
 
     // Return a successful response
     return new Response(JSON.stringify({ message: 'Order created successfully', order }), {
@@ -40,7 +43,7 @@ export async function POST(request) {
     console.error('Error saving order:', error);
 
     // Return an error response
-    return new Response(JSON.stringify({ message: 'Internal server error' }), {
+    return new Response(JSON.stringify({ message: 'Internal server error', error: error.message }), {
       status: 500,
       headers: {
         'Content-Type': 'application/json',

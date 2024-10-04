@@ -58,11 +58,13 @@ export default function PaymentForm() {
         },
         body: JSON.stringify(formDataWithCard),
       });
-
+    
       if (response.ok) {
         router.push(
-          `/order-summary?name=${encodeURIComponent(
-            formData.name
+          `/order-summary?name=${encodeURIComponent(formData.name)}&email=${encodeURIComponent(
+            formData.email
+          )}&address=${encodeURIComponent(formData.address)}&cardNumber=${encodeURIComponent(
+            cardNumber
           )}&orderNumber=${randomOrderNumber}`
         );
       } else {
@@ -70,7 +72,7 @@ export default function PaymentForm() {
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-    }
+    }    
   };
 
   return (

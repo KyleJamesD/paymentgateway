@@ -13,12 +13,20 @@ export default function OrderSummary() {
 
 function OrderSummaryContent() {
   const searchParams = useSearchParams();
-  
+
   const name = searchParams.get('name');
   const email = searchParams.get('email');
   const address = searchParams.get('address');
   const cardNumber = searchParams.get('cardNumber');
   const orderNumber = searchParams.get('orderNumber');
+
+  console.log({
+    name: searchParams.get('name'),
+    email: searchParams.get('email'),
+    address: searchParams.get('address'),
+    cardNumber: searchParams.get('cardNumber'),
+    orderNumber: searchParams.get('orderNumber'),
+  });  
 
   return (
     <div className="p-6 bg-white shadow-lg max-w-2xl mx-auto">

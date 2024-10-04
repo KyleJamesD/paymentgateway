@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: paymentsdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+
+  app:
+    build:
+      context: .
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/paymentsdb
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    volumes:
+      - .:/app
+    command: >
+      sh -c "
+      dockerize -wait tcp://db:5432 -timeout 30s &&
+      npx prisma migrate deploy &&
+      npm run dev
+      "
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

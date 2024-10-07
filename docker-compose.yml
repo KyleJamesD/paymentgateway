@@ -1,43 +1,20 @@
 services:
-  db:
-    image: postgres:13
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: paymentsdb
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5433:5432" # Change the host port to 5433
-    networks:
-      - app-network
-
   app:
     build:
       context: .
-    depends_on:
-      - db
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/paymentsdb
+    env_file: 
+      - .env
     ports:
       - "3000:3000"
-    networks:
-      - app-network
     volumes:
-      - .:/app
+      - .:/home/app-user/app
+      - /home/app-user/app/.next # Exclude .next folder from the host to avoid conflicts
     command: >
       sh -c "
-      until nc -z db 5432; do
-      echo 'Waiting for the database...';
+      until pg_isready -h localhost -p 5432; do
+      echo 'Waiting for PostgreSQL...';
       sleep 3;
       done;
       npx prisma migrate deploy &&
       npm run dev
       "
-
-networks:
-  app-network:
-    driver: bridge
-
-volumes:
-  postgres_data:

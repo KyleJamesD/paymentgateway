@@ -22,12 +22,12 @@ function OrderSummaryContent() {
 
   return (
     <div className="p-6 bg-white shadow-lg max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold">Order Summary</h1>
-      <p><strong>Order Number:</strong> {orderNumber}</p>
-      <p><strong>Name:</strong> {name}</p>
-      <p><strong>Email:</strong> {email}</p>
-      <p><strong>Address:</strong> {address}</p>
-      <p><strong>Card Number:</strong> {cardNumber}</p>
+      <h1 className="text-2xl font-bold text-black">Order Summary</h1>
+      <p className="text-black"><strong className="text-black">Order Number:</strong> {orderNumber}</p>
+      <p className="text-black"><strong className="text-black">Name:</strong> {name}</p>
+      <p className="text-black"><strong className="text-black">Email:</strong> {email}</p>
+      <p className="text-black"><strong className="text-black">Address:</strong> {address}</p>
+      <p className="text-black"><strong className="text-black">Card Number:</strong> {cardNumber}</p>
     </div>
   );
 }

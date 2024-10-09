@@ -2,7 +2,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 // tests connection to the database
-test('should connect to the database', async () => {
+test('DB-01: Connection Verification', async () => {
   await prisma.$connect();
   const result = await prisma.$queryRaw`SELECT 1 + 1 AS result`;
   expect(result[0].result).toBe(2);
@@ -27,6 +27,19 @@ test('should insert an order into the database', async () => {
   expect(order.name).toBe('Jane Doe');
 });
 
+// tests deleting an order
+test('should delete an order', async () => {
+  await prisma.order.delete({
+    where: { id: 1 },
+  });
+
+  const order = await prisma.order.findUnique({
+    where: { id: 1 },
+  });
+
+  expect(order).toBeNull();
+});
+
 // tests retrieving an order by id
 test('should retrieve an order by id', async () => {
   const order = await prisma.order.findUnique({
@@ -45,19 +58,6 @@ test('should update an order by id', async () => {
   });
 
   expect(updatedOrder.name).toBe('John Updated');
-});
-
-// tests deleting an order
-test('should delete an order', async () => {
-  await prisma.order.delete({
-    where: { id: 1 },
-  });
-
-  const order = await prisma.order.findUnique({
-    where: { id: 1 },
-  });
-
-  expect(order).toBeNull();
 });
 
 // tests unique constraint error when inserting duplicate orderNumber in Order

@@ -1,47 +1,101 @@
-const { PrismaClient } = require('@prisma/client');
+const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const fs = require('fs');
+const path = require('path');
+
+// Read and parse the JSON data
+const mockDataPath = path.resolve(__dirname, './__mocks__/mockData.json');
+const mockData = JSON.parse(fs.readFileSync(mockDataPath, 'utf-8'));
 
 // tests connection to the database
-test('DB-01: Connection Verification', async () => {
+test("DB-01: +Connection Verification", async () => {
   await prisma.$connect();
   const result = await prisma.$queryRaw`SELECT 1 + 1 AS result`;
   expect(result[0].result).toBe(2);
   await prisma.$disconnect();
 });
 
-// tests inserting an order into the database
-test('should insert an order into the database', async () => {
-  const order = await prisma.order.create({
-    data: {
-      name: 'Jane Doe',
-      email: 'jane@example.com',
-      address: '456 Main St',
-      city: 'Los Angeles',
-      state: 'CA',
-      zip: '90001',
-      orderNumber: 2,
+// tests database connection using invalid credentials
+test("DB-02: -Connection with Invalid Credentials", async () => {
+  const prisma = new PrismaClient({
+    datasources: {
+      db: {
+        url: 'postgresql://invalid:invalid@localhost:5432/mydatabase',
+      },
     },
+  });
+  expect(prisma.$connect()).rejects.toThrow();
+});
+
+// tests inserting an order into the database
+test('DB-03: +Insert Valid Data', async () => {
+  const insertData = mockData.insertData;
+  const order = await prisma.order.create({
+    data: insertData
   });
 
   expect(order).toBeDefined();
   expect(order.name).toBe('Jane Doe');
+
+  // rollback the insert operation
+  await prisma.payment.delete({
+    where: { id: order.id }
+  });
+  await prisma.order.delete({
+    where: { id: order.id }
+  });
+});
+
+// tests inserting invalid data into the database
+test('DB-04: -Insert with Invalid OrderNumber', async () => {
+  const invalidOrderNumberData = mockData.invalidOrderNumberData;
+  await expect(prisma.order.create({
+    data: invalidOrderNumberData // invalid data contains orderNumber that already exists in seed data
+  })).rejects.toThrow();
+});
+
+// tests inserting invalid credit card data into the database
+test('DB-05: -Insert Invalid Credit Card Data', async () => {
+  const invalidCardNumberData = mockData.invalidCardNumberData;
+  await expect(prisma.payment.create({
+    data: invalidCardNumberData // invalid data contains invalid credit card number
+  })).rejects.toThrow();
 });
 
 // tests deleting an order
-test('should delete an order', async () => {
-  await prisma.order.delete({
-    where: { id: 1 },
+test('DB-06: +Delete a Row', async () => {
+  const deletePayment = await prisma.payment.delete({
+    where: { orderId: 1 }
   });
-
+  const deleteOrder = await prisma.order.delete({
+    where: { id: 1 }
+  });
+  
   const order = await prisma.order.findUnique({
-    where: { id: 1 },
+    where: { id: 1 }
   });
-
   expect(order).toBeNull();
+
+  const payment = await prisma.payment.findUnique({
+    where: { orderId: 1 }
+  });
+  expect(payment).toBeNull();
+
+  // rollback the delete operation
+  await prisma.order.create({
+    data: {...mockData.seedOrders[0], id: 1}
+  });
+});
+
+// Tests whether data can be deleted from the database when the foreign constraint is being violated.
+test('DB-07: -Delete a Row with Foreign Constraint', async () => {
+  await expect(prisma.order.delete({
+    where: { id: 1 }
+  })).rejects.toThrow();
 });
 
 // tests retrieving an order by id
-test('should retrieve an order by id', async () => {
+test('DB-08: +Retrieve Data', async () => {
   const order = await prisma.order.findUnique({
     where: { id: 1 },
   });
@@ -51,103 +105,35 @@ test('should retrieve an order by id', async () => {
 });
 
 // tests updating an order by id
-test('should update an order by id', async () => {
+test('DB-09: +Update Data', async () => {
   const updatedOrder = await prisma.order.update({
     where: { id: 1 },
-    data: { name: 'John Updated' },
+    data: { name: 'John Doe Jr.' },
   });
 
-  expect(updatedOrder.name).toBe('John Updated');
-});
+  expect(updatedOrder).toBeDefined();
+  expect(updatedOrder.name).toBe('John Doe Jr.');
 
-// tests unique constraint error when inserting duplicate orderNumber in Order
-test('should throw unique constraint error when inserting duplicate orderId in Payment', async () => {
-  await prisma.order.create({
-    data: {
-      name: 'John Day',
-      email: 'john@example.com',
-      address: '321 Main St',
-      city: 'New York',
-      state: 'NY',
-      zip: '10501',
-      orderNumber: 3,
-      payment: {
-        create: {
-          cardNumber: '4111111111111111',
-          expMonth: '12',
-          expYear: '2023',
-          cvv: '123',
-        },
-      },
-    },
+  // rollback the update operation
+  await prisma.order.update({
+    where: { id: 1 },
+    data: { name: 'John Doe' },
   });
-
-  await expect(
-    prisma.order.create({
-      data: {
-        name: 'John Day',
-        email: 'john@example.com',
-        address: '321 Main St',
-        city: 'New York',
-        state: 'NY',
-        zip: '10501',
-        orderNumber: 3,
-        payment: {
-          create: {
-            cardNumber: '4111111111111111',
-            expMonth: '12',
-            expYear: '2023',
-            cvv: '123',
-          },
-        },
-      },
-    })
-  ).rejects.toThrow();
 });
 
-// tests fetching an order by id using supertest
-// const request = require('supertest');
-// const app = require('../app'); // Assuming you export the Next.js app for testing
-
-// test('should fetch order by id', async () => {
-//   const res = await request(app).get('/api/orders/1');
-//   expect(res.statusCode).toEqual(200);
-//   expect(res.body.name).toBe('John Doe');
-// });
-
-// tests transaction rollback on failure
-test('should rollback transaction on failure', async () => {
-  const prisma = new PrismaClient();
-
-  const rollback = async () => {
-    const result = await prisma.$transaction(async (tx) => {
-      await tx.order.create({
-        data: {
-          name: 'Temp User',
-          email: 'temp@example.com',
-          address: 'Somewhere',
-          city: 'Some City',
-          state: 'ST',
-          zip: '00000',
-          orderNumber: 100,
-        },
-      });
-      throw new Error('Force rollback');
-    });
-
-    return result;
-  };
-
-  await expect(rollback()).rejects.toThrow('Force rollback');
-  
-  const order = await prisma.order.findUnique({ where: { orderNumber: 100 } });
-  expect(order).toBeNull(); // Ensure it was rolled back
+// tests updating an order with invalid data
+test('DB-10: -Update Data with Invalid Data', async () => {
+  await expect(prisma.order.update({
+    where: { id: 1 },
+    data: { name: 1 }, // attempts to update name with a number
+  })).rejects.toThrow();
 });
 
-// tests order not found code 404
-test('should return 404 if order not found', async () => {
-  const res = await request(app).get('/api/orders/999');
-  expect(res.statusCode).toEqual(404);
+// tests logging of database actions
+test('DB-12: +Log Database Actions', async () => {
+  const log = jest.spyOn(console, 'log').mockImplementation();
+  await prisma.$connect();
+  await prisma.$disconnect();
+  expect(log).toHaveBeenCalledTimes(2);
+  log.mockRestore();
 });
-
-

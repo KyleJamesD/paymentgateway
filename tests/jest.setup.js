@@ -7,6 +7,8 @@ beforeAll(async () => {
   // Clean up any existing data
   await prisma.payment.deleteMany({});
   await prisma.order.deleteMany({});
+  await prisma.$queryRaw`ALTER SEQUENCE "Order_id_seq" RESTART WITH 1;`;
+  await prisma.$queryRaw`ALTER SEQUENCE "Payment_id_seq" RESTART WITH 1;`;
   
   // Seed some initial both tables
   await prisma.order.create({

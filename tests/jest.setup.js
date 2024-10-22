@@ -27,8 +27,8 @@ beforeAll(async () => {
 
 afterAll(async () => {
   // Clean up after tests
-  // await prisma.payment.deleteMany({});
-  // await prisma.order.deleteMany({});
+  await prisma.payment.deleteMany({});
+  await prisma.order.deleteMany({});
   
   await prisma.$disconnect();
 });

@@ -137,3 +137,24 @@ test('DB-12: +Log Database Actions', async () => {
   expect(log).toHaveBeenCalledTimes(2);
   log.mockRestore();
 });
+
+// tests logging of database errors
+// test('DB-13: +Log Database Errors', async () => {
+//   const error = jest.spyOn(console, 'error').mockImplementation();
+//   const prisma = new PrismaClient({
+//     datasources: {
+//       db: {
+//         url: 'postgresql://invalid:invalid@localhost:5432/mydatabase',
+//       },
+//     },
+//   });
+//   await prisma.$connect();
+//   expect(error).toHaveBeenCalledTimes(1);
+//   error.mockRestore();
+// });
+
+// test that queries database metadata for logging activity
+// test('DB-14: +Query Database Metadata', async () => {
+//   const result = await prisma.$queryRaw`SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'`;
+//   expect(result).toBeDefined();
+// });

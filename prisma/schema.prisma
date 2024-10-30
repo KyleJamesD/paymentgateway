@@ -21,7 +21,7 @@ model Order {
   city       String
   state      String
   zip        String
-  orderNumber Int
+  orderNumber Int     @unique
   payment    Payment?
 }
 

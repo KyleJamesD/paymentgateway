@@ -1,0 +1,90 @@
+{
+  "seedOrders": [
+    {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "address": "123 Main St",
+      "city": "New York",
+      "state": "NY",
+      "zip": "10001",
+      "orderNumber": 100,
+      "payment": {
+        "create": {
+          "cardNumber": "4111111111111111",
+          "expMonth": "12",
+          "expYear": "2023",
+          "cvv": "123"
+        }
+      }
+    },
+
+    {
+      "name": "Jane Doe",
+      "email": "Jane@example.com",
+      "address": "123 Main St",
+      "city": "New York",
+      "state": "NY",
+      "zip": "10010",
+      "orderNumber": 102,
+      "payment": {
+        "create": {
+          "cardNumber": "4111111111111112",
+          "expMonth": "12",
+          "expYear": "2023",
+          "cvv": "123"
+        }
+      }
+    }
+  ],
+  "insertData": {
+    "name": "Jane Doe",
+    "email": "jane@example.com",
+    "address": "456 Main St",
+    "city": "Los Angeles",
+    "state": "CA",
+    "zip": "90001",
+    "orderNumber": 103,
+    "payment": {
+      "create": {
+        "cardNumber": "4111111111111113",
+        "expMonth": "12",
+        "expYear": "2023",
+        "cvv": "123"
+      }
+    }
+  },
+  "invalidOrderNumberData": {
+    "name": "Jane Doe",
+    "email": "jane@example.com",
+    "address": "456 Main St",
+    "city": "Los Angeles",
+    "state": "CA",
+    "zip": "90001",
+    "orderNumber": 102,
+    "payment": {
+      "create": {
+        "cardNumber": "4111111111111113",
+        "expMonth": "12",
+        "expYear": "2023",
+        "cvv": "123"
+      }
+    }
+  },
+  "invalidCardNumberData": {
+    "name": "Judy Doe",
+    "email": "Judy@example.com",
+    "address": "123 Main St",
+    "city": "New York",
+    "state": "NY",
+    "zip": "10100",
+    "orderNumber": 104,
+    "payment": {
+      "create": {
+        "cardNumber": "4111111111111ABC",
+        "expMonth": "12",
+        "expYear": "2023",
+        "cvv": "123"
+      }
+    }
+  }
+}

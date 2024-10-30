@@ -35,9 +35,15 @@ export default function PaymentForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent default form submission
+
+    // Validate card number length
+    if (cardNumber.length !== 15 && cardNumber.length !== 16) {
+      alert("Credit card number must be 15 or 16 digits.");
+      return; // Exit the function if validation fails
+    }
+
     const randomOrderNumber = Math.floor(Math.random() * 1000000); // Generate random order number
 
-    // Ensure expMonth, expYear, and cvv are captured in the form submission data
     const formDataWithCard = {
       ...formData,
       cardNumber,
@@ -185,21 +191,27 @@ export default function PaymentForm() {
 
             {/* Credit Card Number */}
             <div className="mb-4">
-              <label htmlFor="cardNum">Credit Card Number:</label>
-              <input
-                type="text"
-                id="cardNum"
-                name="cardNum"
-                value={cardNumber}
-                onChange={(e) =>
-                  setCardNumber(formatCardNumber(e.target.value))
+            <label htmlFor="cardNum">Credit Card Number:</label>
+            <input
+              type="text"
+              id="cardNum"
+              name="cardNum"
+              value={cardNumber}
+              onChange={(e) => {
+                const formattedValue = e.target.value.replace(/\D/g, ''); // Remove non-digit characters
+                if (formattedValue.length <= 16) {
+                  setCardNumber(formattedValue);
                 }
-                maxLength="19"
-                placeholder="1111-2222-3333-4444"
-                required
-                className="w-full border p-2 text-black"
-              />
-            </div>
+              }}
+              maxLength="16"
+              placeholder="1111222233334444"
+              required
+              className="w-full border p-2 text-black"
+            />
+            {cardNumber.length > 0 && cardNumber.length < 15 && (
+              <p className="text-red-500">Credit card number must be 15 or 16 digits.</p>
+            )}
+          </div>
 
             {/* Expiration Month */}
             <div className="mb-4">

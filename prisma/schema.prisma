@@ -34,3 +34,11 @@ model Payment {
   orderId       Int    @unique
   order         Order  @relation(fields: [orderId], references: [id])
 }
+
+model AccessLog {
+  id            Int      @id @default(autoincrement())
+  timestamp     DateTime @default(now()) // When the login attempt occurred
+  ipAddress     String?  // Optional IP address from which the attempt was made
+  userAgent     String?  // Optional user agent string from the request
+  success       Boolean  // Indicates if the login attempt was successful or not
+}

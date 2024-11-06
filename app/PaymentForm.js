@@ -35,15 +35,9 @@ export default function PaymentForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent default form submission
-
-    // Validate card number length
-    if (cardNumber.length !== 15 && cardNumber.length !== 16) {
-      alert("Credit card number must be 15 or 16 digits.");
-      return; // Exit the function if validation fails
-    }
-
     const randomOrderNumber = Math.floor(Math.random() * 1000000); // Generate random order number
 
+    // Ensure expMonth, expYear, and cvv are captured in the form submission data
     const formDataWithCard = {
       ...formData,
       cardNumber,
@@ -80,7 +74,7 @@ export default function PaymentForm() {
   };
 
   return (
-    <div className="bg-white p-5 shadow-lg w-[700px]">
+    <div className="bg-white text-black p-5 shadow-lg w-[700px]">
       <form onSubmit={handleSubmit}>
         <div className="flex flex-wrap gap-4">
           <div className="flex-1 min-w-[250px]">
@@ -95,9 +89,9 @@ export default function PaymentForm() {
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                placeholder="Enter your full name"
+                placeholder="Eg. Bob Smith"
                 required
-                className="w-full border p-2 text-black"
+                className="w-full border p-2 text-black placeholder-gray-500"
               />
             </div>
 
@@ -109,9 +103,9 @@ export default function PaymentForm() {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                placeholder="Enter email address"
+                placeholder="Eg. example@gmail.com"
                 required
-                className="w-full border p-2 text-black"
+                className="w-full border p-2 text-black placeholder-gray-500"
               />
             </div>
 
@@ -123,9 +117,9 @@ export default function PaymentForm() {
                 name="address"
                 value={formData.address}
                 onChange={handleInputChange}
-                placeholder="Enter address"
+                placeholder="Eg 123 Handsome Ave SW"
                 required
-                className="w-full border p-2 text-black"
+                className="w-full border p-2 text-black placeholder-gray-500"
               />
             </div>
 
@@ -137,9 +131,9 @@ export default function PaymentForm() {
                 name="city"
                 value={formData.city}
                 onChange={handleInputChange}
-                placeholder="Enter city"
+                placeholder="Eg. Calgary"
                 required
-                className="w-full border p-2 text-black"
+                className="w-full border p-2 text-black placeholder-gray-500"
               />
             </div>
 
@@ -152,9 +146,9 @@ export default function PaymentForm() {
                   name="state"
                   value={formData.state}
                   onChange={handleInputChange}
-                  placeholder="Enter state"
+                  placeholder="Eg. NYC"
                   required
-                  className="w-full border p-2 text-black"
+                  className="w-full border p-2 text-black placeholder-gray-500"
                 />
               </div>
 
@@ -168,7 +162,7 @@ export default function PaymentForm() {
                   onChange={handleInputChange}
                   placeholder="123 456"
                   required
-                  className="w-full border p-2 text-black"
+                  className="w-full border p-2 text-black placeholder-gray-500"
                 />
               </div>
             </div>
@@ -183,35 +177,29 @@ export default function PaymentForm() {
               <input
                 type="text"
                 id="cardName"
-                placeholder="Enter card name"
+                placeholder="Eg. Bob Smith"
                 required
-                className="w-full border p-2 text-black"
+                className="w-full border p-2 text-black placeholder-gray-500"
               />
             </div>
 
             {/* Credit Card Number */}
             <div className="mb-4">
-            <label htmlFor="cardNum">Credit Card Number:</label>
-            <input
-              type="text"
-              id="cardNum"
-              name="cardNum"
-              value={cardNumber}
-              onChange={(e) => {
-                const formattedValue = e.target.value.replace(/\D/g, ''); // Remove non-digit characters
-                if (formattedValue.length <= 16) {
-                  setCardNumber(formattedValue);
+              <label htmlFor="cardNum">Credit Card Number:</label>
+              <input
+                type="text"
+                id="cardNum"
+                name="cardNum"
+                value={cardNumber}
+                onChange={(e) =>
+                  setCardNumber(formatCardNumber(e.target.value))
                 }
-              }}
-              maxLength="16"
-              placeholder="1111222233334444"
-              required
-              className="w-full border p-2 text-black"
-            />
-            {cardNumber.length > 0 && cardNumber.length < 15 && (
-              <p className="text-red-500">Credit card number must be 15 or 16 digits.</p>
-            )}
-          </div>
+                maxLength="19"
+                placeholder="1111-2222-3333-4444"
+                required
+                className="w-full border p-2 text-black placeholder-gray-500"
+              />
+            </div>
 
             {/* Expiration Month */}
             <div className="mb-4">
@@ -272,7 +260,7 @@ export default function PaymentForm() {
                   onChange={(e) => setCvv(e.target.value)}
                   placeholder="123"
                   required
-                  className="w-full border p-2"
+                  className="w-full border p-2 placeholder-gray-500"
                 />
               </div>
             </div>
